@@ -7,6 +7,7 @@ import os
 import sys
 import getopt
 from subprocess import check_output, call
+import pathlib
 
 # TODO use GitPython once it is compatible with python3
 # instead of calling git(3)
@@ -71,11 +72,12 @@ def get_content(file_name):
 
 def get_refs(name):
   folder = os.path.join('.git', os.path.join('refs', name))
-  refs = os.listdir(folder)
+  git_refs_path = pathlib.Path(folder)
+  refs = [f for f in git_refs_path.glob('**/*') if f.is_file()]
   dic = []
   for ref in refs:
-    dic.append((ref,
-      cut_sha(get_content(os.path.join(folder, ref)))))
+    short_ref = str.replace(str(ref), folder + '/', '')
+    dic.append((short_ref, cut_sha(get_content(ref))))
   return dic
 
 def create_graph(file_name):
